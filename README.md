@@ -100,16 +100,7 @@ Frontend runs on http://localhost:5173
 
 ---
 
-## 💰 Monetization Options
 
-### SaaS Model
-- Add Stripe: `npm install @stripe/stripe-js`
-- Charge $29-99/month per company
-- Multi-tenant: add `company_id` to all tables
-
-### Sell Source Code
-- List on Gumroad / CodeCanyon at $49-149
-- Include this README + setup video
 
 ---
 
