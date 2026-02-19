@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: bloomhr-db
+    environment:
+      POSTGRES_DB: bloomhr
+      POSTGRES_USER: bloomhr_user
+      POSTGRES_PASSWORD: bloomhr_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - bloomhr_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bloomhr_user -d bloomhr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
+  backend:
+    build: ./backend
+    container_name: bloomhr-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bloomhr
+      SPRING_DATASOURCE_USERNAME: bloomhr_user
+      SPRING_DATASOURCE_PASSWORD: bloomhr_pass
+      JWT_SECRET: CHANGE_THIS_TO_A_LONG_SECRET_KEY_IN_PRODUCTION
+      JWT_EXPIRATION: 86400000
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+    ports:
+      - "8080:8080"
+
+  # React Frontend
+  frontend:
+    build: ./frontend
+    container_name: bloomhr-web
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://backend:8080/api
+    ports:
+      - "3000:3000"
+
+volumes:
+  bloomhr_data:
